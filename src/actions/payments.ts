@@ -238,6 +238,7 @@ export async function getDashboardStats() {
     allDebts,
     allPayments,
     overdueDebts,
+    allFines,
   ] = await Promise.all([
     prisma.residence.count(),
     prisma.residence.count({ where: { status: "OCCUPIED" } }),
@@ -252,9 +253,11 @@ export async function getDashboardStats() {
         dueDate: { lt: new Date() },
       },
     }),
+    prisma.fine.findMany({ where: { status: { not: "PAID" } }),
   ])
 
   const totalDebt = allDebts.reduce((sum, d) => sum + d.amount, 0)
+  const totalFines = allFines.reduce((sum, f) => sum + f.amount, 0)
   const totalCollected = allPayments.reduce((sum, p) => sum + p.amount, 0)
 
   return {
@@ -264,6 +267,7 @@ export async function getDashboardStats() {
     rentedCount,
     anticresisCount,
     totalDebt,
+    totalFines,
     totalCollected,
     pendingPayments: allPayments.filter(
       (p) => new Date(p.paymentDate) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)

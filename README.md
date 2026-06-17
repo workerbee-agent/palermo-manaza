@@ -7,6 +7,7 @@ Sistema de administración para el Conjunto Residencial Palermo Manaza, construi
 - **Autenticación** con JWT y código OTP por correo
 - **Roles**: Administrador, Presidente, Tesorera, Secretaria, Residente
 - **Gestión de Residencias**: Casas y departamentos (estado: habitada, abandonada, arrendada, anticresis)
+- **Multas**: Creación, pagos, aprobación por presidencia
 - **Email**: SMTP con nodemailer
 - **Propietarios**: Solteros o casados (concónyuge)
 - **Arrendatarios**: Registro independiente

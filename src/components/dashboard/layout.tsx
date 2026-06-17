@@ -28,6 +28,7 @@ import {
   Bell,
   ChevronDown,
   UserCircle,
+  AlertTriangle,
 } from "lucide-react"
 
 interface NavItem {
@@ -48,6 +49,12 @@ const navItems: NavItem[] = [
     href: "/dashboard/residences",
     icon: <Building className="w-5 h-5" />,
     roles: ["ADMIN", "PRESIDENT", "TREASURER", "SECRETARY"],
+  },
+  {
+    title: "Multas",
+    href: "/dashboard/fines",
+    icon: <AlertTriangle className="w-5 h-5" />,
+    roles: ["ADMIN", "PRESIDENT", "TREASURER"],
   },
   {
     title: "Pagos",

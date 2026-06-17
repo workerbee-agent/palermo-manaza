@@ -257,3 +257,36 @@ model AuditLog {
   details   String?
   createdAt DateTime @default(now())
 }
+
+model Fine {
+  id           String      @id @default(cuid())
+  residenceId  String
+  residence   Residence   @relation(fields: [residenceId], references: [id])
+  amount      Float
+  reason      String
+  status     FineStatus  @default(PENDING)
+  dueDate     DateTime
+  createdBy   String
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  payments    FinePayment[]
+}
+
+enum FineStatus {
+  PENDING
+  PAID
+  CANCELLED
+  WAITING_APPROVAL
+}
+
+model FinePayment {
+  id          String   @id @default(cuid())
+  fineId      String
+  fine        Fine     @relation(fields: [fineId], references: [id])
+  amount      Float
+  paymentDate DateTime
+  reference   String?
+  method      PaymentMethod
+  createdAt   DateTime @default(now())
+}
