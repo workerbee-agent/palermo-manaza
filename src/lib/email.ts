@@ -1,6 +1,17 @@
+import nodemailer from "nodemailer"
 import { render } from "@react-email/render"
-import WelcomeEmail from "./templates/welcome"
-import ForgotPasswordEmail from "./templates/forgot-password"
+import WelcomeEmail from "../emails/templates/welcome"
+import ForgotPasswordEmail from "../emails/templates/forgot-password"
+
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || "mail.urbeecode.com",
+  port: parseInt(process.env.SMTP_PORT || "587"),
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER || "sales@urbeecode.com",
+    pass: process.env.SMTP_PASS || "30,iAlicKlEYspIPte,?",
+  },
+})
 
 export async function sendEmail(
   to: string,
@@ -8,10 +19,6 @@ export async function sendEmail(
   template: "welcome" | "forgot-password",
   data: Record<string, any>
 ) {
-  const { Resend } = await import("resend")
-  
-  const resend = new Resend(process.env.RESEND_API_KEY)
-
   let html = ""
   let emailComponent: React.ReactElement
 
@@ -28,8 +35,8 @@ export async function sendEmail(
 
   html = await render(emailComponent)
 
-  const result = await resend.emails.send({
-    from: process.env.EMAIL_FROM || "Palermo Manaza <noreply@palermo-manaza.com>",
+  const result = await transporter.sendMail({
+    from: process.env.SMTP_FROM || "Palermo Manaza <noreply@palermo-manaza.com>",
     to,
     subject,
     html,

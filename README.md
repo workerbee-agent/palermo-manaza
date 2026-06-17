@@ -7,6 +7,7 @@ Sistema de administración para el Conjunto Residencial Palermo Manaza, construi
 - **Autenticación** con JWT y código OTP por correo
 - **Roles**: Administrador, Presidente, Tesorera, Secretaria, Residente
 - **Gestión de Residencias**: Casas y departamentos (estado: habitada, abandonada, arrendada, anticresis)
+- **Email**: SMTP con nodemailer
 - **Propietarios**: Solteros o casados (concónyuge)
 - **Arrendatarios**: Registro independiente
 - **Deudas**: Generación automática por año/mes
@@ -17,10 +18,10 @@ Sistema de administración para el Conjunto Residencial Palermo Manaza, construi
 ## 🛠️ Tech Stack
 
 - Next.js 15 (App Router)
-- Prisma + SQLite
+- Prisma + PostgreSQL
 - shadcn/ui + Tailwind CSS
 - JWT + OTP
-- Resend (emails)
+- nodemailer (SMTP)
 
 ## 📦 Instalación
 
@@ -44,18 +45,34 @@ npm run dev
 ## 🔧 Variables de Entorno
 
 ```env
-# Database (SQLite)
-DATABASE_URL="file:./dev.db"
+# Database (PostgreSQL)
+DATABASE_URL="postgresql://user:password@localhost:5432/palermo_manaza"
 
 # JWT Secret
 JWT_SECRET="tu-secret-key-aqui"
 
-# Email (Resend)
-RESEND_API_KEY="re_xxx"
-EMAIL_FROM="Palermo Manaza <noreply@palermo-manaza.com>"
+# SMTP Email
+SMTP_HOST="mail.urbeecode.com"
+SMTP_PORT="587"
+SMTP_USER="sales@urbeecode.com"
+SMTP_PASS="tu-password"
+SMTP_FROM="Palermo Manaza <noreply@palermo-manaza.com>"
 
 # App URL
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
+```
+
+## 🐘 PostgreSQL
+
+```bash
+# Crear base de datos
+createdb palermo_manaza
+
+# Generar migraciones
+npx prisma migrate dev --name init
+
+# O solo push (desarrollo)
+npx prisma db push
 ```
 
 ## 📝 Estructura
