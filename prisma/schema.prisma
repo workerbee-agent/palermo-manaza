@@ -1,0 +1,259 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password     String
+  firstName    String
+  lastName     String
+  phone        String?
+  role         Role      @default(RESIDENT)
+  avatar       String?
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  payments     Payment[]
+  notifications Notification[]
+  otp          OtpCode?
+}
+
+enum Role {
+  ADMIN
+  PRESIDENT
+  TREASURER
+  SECRETARY
+  RESIDENT
+}
+
+model Residence {
+  id          String          @id @default(cuid())
+  name        String
+  type       ResidenceType
+  block      String
+  floor      Int?
+  address    String
+  status     OccupancyStatus @default(OCCUPIED)
+  ownerId    String        @unique
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  payments   Payment[]
+  debts      Debt[]
+  documents  Document[]
+}
+
+enum ResidenceType {
+  HOUSE
+  APARTMENT
+}
+
+enum OccupancyStatus {
+  OCCUPIED
+  ABANDONED
+  RENTED
+  ANTICRESIS
+}
+
+model Owner {
+  id              String    @id @default(cuid())
+  residenceId     String    @unique
+  type            OwnerType
+  spouseName     String?
+  spouseId       String?
+  identification String
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+enum OwnerType {
+  SINGLE
+  MARRIED
+}
+
+model Tenant {
+  id              String    @id @default(cuid())
+  residenceId     String    @unique
+  identification  String
+  name            String
+  phone           String?
+  email           String?
+  startDate       DateTime
+  endDate        DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model YearConfig {
+  id          String    @id @default(cuid())
+  year        Int       @unique
+  amount      Float
+  dueDay      Int       @default(10)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  debts        Debt[]
+}
+
+model Debt {
+  id           String      @id @default(cuid())
+  residenceId  String
+  residence   Residence   @relation(fields: [residenceId], references: [id])
+  yearConfigId String
+  yearConfig  YearConfig  @relation(fields: [yearConfigId], references: [id])
+  month       Int
+  amount      Float
+  status      DebtStatus  @default(PENDING)
+  dueDate     DateTime
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  payments    Payment[]
+}
+
+enum DebtStatus {
+  PENDING
+  PARTIAL
+  PAID
+  CANCELLED
+}
+
+model Payment {
+  id            String      @id @default(cuid())
+  residenceId   String
+  residence   Residence   @relation(fields: [residenceId], references: [id])
+  userId       String
+  user        User        @relation(fields: [userId], references: [id])
+  debtId      String?     @unique
+  debt       Debt?       @relation(fields: [debtId], references: [id])
+  amount      Float
+  paymentDate DateTime
+  reference   String?
+  method      PaymentMethod
+  observation String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+enum PaymentMethod {
+  CASH
+  TRANSFER
+  CHECK
+  DEPOSIT
+}
+
+model Document {
+  id           String       @id @default(cuid())
+  residenceId  String
+  residence   Residence    @relation(fields: [residenceId], references: [id])
+  type        DocumentType
+  issuedAt     DateTime
+  expiresAt   DateTime?
+  issuedBy    String
+  pdfPath     String?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+}
+
+enum DocumentType {
+  CERTIFICATE_EXPENSAS
+  CERTIFICATE_DEBT
+  CERTIFICATE_OWNERSHIP
+  CERTIFICATE_TENANT
+}
+
+model PaymentAgreement {
+  id              String           @id @default(cuid())
+  residenceId     String
+  totalAmount    Float
+  initialAmount Float
+  monthlyAmount Float
+  months       Int
+  status       AgreementStatus @default(ACTIVE)
+  createdBy     String
+  approvedBy   String?
+  approvedAt  DateTime?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  installments Installment[]
+}
+
+enum AgreementStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+model Installment {
+  id           String           @id @default(cuid())
+  agreementId  String
+  agreement   PaymentAgreement @relation(fields: [agreementId], references: [id])
+  dueDate     DateTime
+  amount      Float
+  status      InstallmentStatus @default(PENDING)
+  paidAt      DateTime?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+enum InstallmentStatus {
+  PENDING
+  PAID
+  OVERDUE
+}
+
+model OtpCode {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  code      String
+  type      OtpType
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+}
+
+enum OtpType {
+  RESET_PASSWORD
+  VERIFY_EMAIL
+}
+
+model Notification {
+  id         String           @id @default(cuid())
+  userId     String
+  user       User            @relation(fields: [userId], references: [id])
+  title     String
+  message   String
+  type      NotificationType
+  readAt    DateTime?
+  createdAt DateTime        @default(now())
+}
+
+enum NotificationType {
+  PAYMENT_RECEIVED
+  DEBT_OVERDUE
+  AGREEMENT_APPROVED
+  DOCUMENT_ISSUED
+  SYSTEM
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String
+  entity    String
+  entityId  String
+  details   String?
+  createdAt DateTime @default(now())
+}
