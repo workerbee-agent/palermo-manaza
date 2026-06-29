@@ -129,20 +129,30 @@ enum DebtStatus {
 }
 
 model Payment {
-  id            String      @id @default(cuid())
+  id            String        @id @default(cuid())
   residenceId   String
-  residence   Residence   @relation(fields: [residenceId], references: [id])
+  residence   Residence     @relation(fields: [residenceId], references: [id])
   userId       String
-  user        User        @relation(fields: [userId], references: [id])
-  debtId      String?     @unique
-  debt       Debt?       @relation(fields: [debtId], references: [id])
+  user        User          @relation(fields: [userId], references: [id])
+  debtId      String?       @unique
+  debt        Debt?         @relation(fields: [debtId], references: [id])
   amount      Float
   paymentDate DateTime
   reference   String?
   method      PaymentMethod
   observation String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  status      PaymentStatus @default(PENDING)
+  proofUrl    String?       // URL del comprobante subido
+  approvedBy String?
+  approvedAt DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+enum PaymentStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 enum PaymentMethod {
@@ -150,6 +160,9 @@ enum PaymentMethod {
   TRANSFER
   CHECK
   DEPOSIT
+  PAYPAL
+  PAYPHONE
+  TRANSFERENCIA
 }
 
 model Document {
@@ -289,4 +302,39 @@ model FinePayment {
   reference   String?
   method      PaymentMethod
   createdAt   DateTime @default(now())
+}
+
+model PaymentConfig {
+  id                    String   @id @default(cuid())
+  bankName              String
+  accountNumber        String
+  accountName          String
+  clabe               String?
+  paypalClientId      String?
+  paypalClientSecret  String?
+  payphoneApiKey      String?
+  payphoneApiSecret  String?
+  isActive            Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+// ========== CONTABILIDAD ==========
+
+model Transaction {
+  id          String           @id @default(cuid())
+  type        TransactionType
+  category    String
+  amount      Float
+  description String
+  reference   String?
+  date        DateTime
+  createdBy   String
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
 }

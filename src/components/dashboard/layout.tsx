@@ -29,6 +29,7 @@ import {
   ChevronDown,
   UserCircle,
   AlertTriangle,
+  Wallet,
 } from "lucide-react"
 
 interface NavItem {
@@ -79,6 +80,12 @@ const navItems: NavItem[] = [
     href: "/dashboard/documents",
     icon: <FileText className="w-5 h-5" />,
     roles: ["ADMIN", "PRESIDENT", "TREASURER"],
+  },
+  {
+    title: "Contabilidad",
+    href: "/dashboard/accounting",
+    icon: <Wallet className="w-5 h-5" />,
+    roles: ["ADMIN", "PRESIDENT", "TREASURER", "RESIDENT"],
   },
   {
     title: "Usuarios",

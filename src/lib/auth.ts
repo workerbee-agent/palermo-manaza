@@ -84,3 +84,9 @@ export function hasPermission(
 ): boolean {
   return requiredRoles.includes(userRole)
 }
+
+export async function auth() {
+  // This is a simplified auth function for the server components
+  // In production, you would get the token from cookies or headers
+  return null
+}

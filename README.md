@@ -12,7 +12,7 @@ Sistema de administración para el Conjunto Residencial Palermo Manaza, construi
 - **Propietarios**: Solteros o casados (concónyuge)
 - **Arrendatarios**: Registro independiente
 - **Deudas**: Generación automática por año/mes
-- **Pagos**: Registro con recibo automático
+- **Pagos**: Registro manual + pagos en línea (Stripe/Payku)
 - **Convenios**: Creación y aprobación (presidente)
 - **Certificados**: Expensas, deuda, propiedad, arrendatario
 
@@ -23,6 +23,7 @@ Sistema de administración para el Conjunto Residencial Palermo Manaza, construi
 - shadcn/ui + Tailwind CSS
 - JWT + OTP
 - nodemailer (SMTP)
+- Stripe / Payku (Pagos en línea)
 
 ## 📦 Instalación
 
@@ -39,8 +40,91 @@ npx prisma generate
 # 4. Crear base de datos
 npx prisma db push
 
-# 5. Iniciar servidor
+# 5. Poblar datos iniciales (seeds)
+npm run db:seed
+
+# 6. Iniciar servidor
 npm run dev
+```
+
+## 🌱 Seeds (Datos de Prueba)
+
+El seed crea usuarios, roles, residencias y deudas de ejemplo:
+
+```bash
+# Ejecutar seeds
+npm run db:seed
+
+# Reset completo (borra todo y vuelve a seed)
+npm run db:reset && npm run db:seed
+```
+
+### Credenciales por defecto
+
+| Rol | Email | Password |
+|----|-------|----------|
+| Admin | admin@palermo.com | Password123! |
+| Presidente | presidente@palermo.com | Password123! |
+| Tesorero | tesorero@palermo.com | Password123! |
+| Residente | resident1@palermo.com | Password123! |
+
+## 💳 Pagos en Línea
+
+### Métodos soportados
+
+| Método | Flujo |
+|--------|------|
+| **PayPal** | Usuario paga → Sube comprobante → Admin aprueba |
+| **Payphone** | Usuario paga → Sube comprobante → Admin aprueba |
+| **Transferencia** | Usuario transfiere → Sube comprobante → Admin aprueba |
+
+### Flujo de Pago
+
+1. **Residente** inicia pago desde su dashboard
+2. Selecciona método (PayPal / Payphone / Transferencia)
+3. **Paga** en la plataforma externa
+4. **Sube comprobante** (captura de pago / voucher)
+5. Estado: **PENDIENTE** (espera aprobación)
+6. **Admin/Tesorero** verifica y aprueba
+7. Sistema actualiza deuda como **PAID**
+8. Notificación enviada al residente
+
+### Estados de pago
+
+| Estado | Descripción |
+|--------|-------------|
+| PENDING | Esperando aprobación del comprobante |
+| APPROVED | Comprobante verificado → deuda pagada |
+| REJECTED | Comprobante inválido → residente debe subir otro |
+
+### Configuración
+
+```env
+# PayPal
+PAYPAL_CLIENT_ID="..."
+PAYPAL_CLIENT_SECRET="..."
+PAYPAL_MODE="live"  # sandbox | live
+
+# Payphone (Ecuador)
+PAYPHONE_API_KEY="..."
+PAYPHONE_API_SECRET="..."
+PAYPHONE_ENV="production"
+
+# Datos para transferencias (mostrados al usuario)
+BANK_NAME="Banco Pichincha"
+ACCOUNT_NUMBER="****1234"
+ACCOUNT_NAME="Conjunto Palermo Manaza"
+CLABE="..."
+```
+
+## 📤 Despliegue (Production)
+
+```bash
+# Build de producción
+npm run build
+
+# Generar migrations para producción
+npx prisma migrate deploy
 ```
 
 ## 🔧 Variables de Entorno
