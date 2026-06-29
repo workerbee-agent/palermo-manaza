@@ -30,8 +30,14 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# env files (NO commits - credentials)
+.env
+
+# dev database
+dev.db
+
+# Prisma
+/prisma/migrations
 
 # vercel
 .vercel
