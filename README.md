@@ -15,6 +15,7 @@ Sistema de administración para el Conjunto Residencial Palermo Manaza, construi
 - **Pagos**: Registro manual + pagos en línea (Stripe/Payku)
 - **Convenios**: Creación y aprobación (presidente)
 - **Certificados**: Expensas, deuda, propiedad, arrendatario
+- **Contabilidad**: Registro de ingresos/egresos, saldo en tiempo real por mes, visualización por mes
 
 ## 🛠️ Tech Stack
 
@@ -24,6 +25,43 @@ Sistema de administración para el Conjunto Residencial Palermo Manaza, construi
 - JWT + OTP
 - nodemailer (SMTP)
 - Stripe / Payku (Pagos en línea)
+
+## 💰 Contabilidad
+
+Módulo de gestión financiera del conjunto con registro de transacciones.
+
+### Características
+
+- **Saldo en tiempo real**: Ingresos - Egresos
+- **Resumen mensual**: Por mes específico
+- **Categorías de ingreso**: Cuota condominal, expensa, multa, evento
+- **Categorías de egreso**: Mantenimiento, servicios, insumos, abogado
+
+### Roles
+
+| Rol | Ver Balance | Crear Transacción |
+|-----|-------------|------------------|
+| RESIDENT | ✅ | ❌ |
+| TREASURER | ✅ | ✅ |
+| PRESIDENT | ✅ | ✅ |
+| ADMIN | ✅ | ✅ |
+
+**Nota:** Tesorero y Presidente también pueden ser residentes (rol dual).
+
+### Modelo de Datos
+
+```prisma
+model Transaction {
+  id          String           @id @default(cuid())
+  type        TransactionType  // INCOME | EXPENSE
+  category    String
+  amount      Float
+  description String
+  reference   String?
+  date        DateTime
+  createdBy   String
+}
+```
 
 ## 📦 Instalación
 
@@ -177,10 +215,10 @@ src/
 | Rol | Permisos |
 |-----|---------|
 | ADMIN | Full acceso |
-| PRESIDENT | Aprobar convenios, reportes |
-| TREASURER | Pagos, certificados |
+| PRESIDENT | Aprobar convenios, reportes, contabilidad |
+| TREASURER | Pagos, certificados, contabilidad |
 | SECRETARY | Residentes, basic |
-| RESIDENT | Ver su deuda, pagar |
+| RESIDENT | Ver su deuda, pagar, ver contabilidad |
 
 ## 📄 License
 
